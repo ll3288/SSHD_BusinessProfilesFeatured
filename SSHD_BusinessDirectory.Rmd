@@ -1,0 +1,57 @@
+---
+title: "SSHD_Directory"
+author: "Lorraine Liao"
+date: "January 2, 2021"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(rvest)
+library(dplyr)
+library(knitr)
+library(tidyverse)
+
+SSHD_site <- "https://southstreet.com/my-south-street/"
+directory <- read_html(SSHD_site)
+
+str(directory)
+body_nodes <- directory %>% 
+    html_node('body') %>% 
+    html_children()
+
+body_nodes %>% 
+    html_children()
+
+name_business <- directory %>% rvest::html_nodes('body') %>% 
+    xml2::xml_find_all('/html/body/div[2]/div[2]/div/main/article/section/div/div/h3') %>% 
+    rvest::html_text()
+
+Address <- directory %>% rvest::html_nodes('body') %>% 
+    xml2::xml_find_all('/html/body/div[2]/div[2]/div/main/article/section/div/div/h4') %>% 
+    rvest::html_text()
+
+Picture <- directory %>%
+    html_nodes("section.team-members .cell img") %>%
+    html_attr("src")
+
+Website <- directory %>%
+    xml2::xml_find_all('/html/body/div[2]/div[2]/div/main/article/section[2]/div/div/div/p[1]/a') %>% 
+    html_attr("href")
+
+Profile <- directory %>% 
+    xml2::xml_find_all('/html/body/div[2]/div[2]/div/main/article/section[2]/div/div/div/p[2]') %>% rvest::html_text()
+
+chart_df <- data.frame(name_business, Address, Picture,Website,Profile)
+
+knitr::kable(chart_df)
+
+chart_df$name_business <- as.character(chart_df$name_business)
+
+
+chart_df <- separate(chart_df , name_business , c("Name" , "Title" , "Business") , ",")
+
+
+knitr::kable(chart_df)
+
+write.csv(chart_df, "C:/Users/lorra/Documents/SSHD_BusinessProfiles.csv" )
+```
